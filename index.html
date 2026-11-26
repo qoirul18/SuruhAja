@@ -1,50 +1,1149 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Web App</title>
-
-  <!-- Izinkan akses fitur browser -->
-  <meta http-equiv="Permissions-Policy"
-        content="camera=(self), microphone=(self), geolocation=(self)">
-
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #ffffff;
-    }
-
-    iframe {
-      display: block;
-      width: 100%;
-      height: 100vh;
-      height: 100dvh;
-      border: 0;
-      margin: 0;
-      padding: 0;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SuruhAja Cepu — Ojek, Pesan Makan &amp; Kirim Paket</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
 </head>
-
 <body>
+  <div class="app-frame">
+    <!-- TOP NAVBAR -->
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand" id="brandHomeLink">
+          <div class="brand-logo" id="headerLogoBox">
+            <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-label="SuruhAja Logo">
+              <circle cx="14" cy="14" r="10" fill="rgba(255,255,255,0.18)"/>
+              <path d="M9 17.5C9 14.5 11.2 12.2 14 12.2C16.8 12.2 19 14.5 19 17.5" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/>
+              <path d="M14 7.5V12.2M14 7.5L17.5 9.5" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="9.5" cy="19.2" r="2.2" fill="#FFFFFF"/>
+              <circle cx="18.5" cy="19.2" r="2.2" fill="#FFFFFF"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h1 id="headerAppName">SuruhAja</h1>
+            <span id="headerTagline">Ojek, Makan &amp; Paket Cepu</span>
+          </div>
+        </div>
 
-  <iframe
-    src="https://script.google.com/macros/s/AKfycbyd5WCYqQq4x44jOC0TI8xcOLjzmUF-Fdhi9-to6KJMlU8H9CiN71VF2fUPc20Dq7fn/exec"
-    allow="camera; microphone; geolocation; fullscreen"
-    allowfullscreen
-    referrerpolicy="no-referrer-when-downgrade">
-  </iframe>
+        <div class="topbar-actions">
+          <button type="button" id="themeToggleBtn" class="icon-btn" title="Mode Gelap / Terang" aria-label="Mode Gelap atau Terang">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <button type="button" id="googleNavBtn" class="btn-pill btn-google-mini">
+            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.45a5.52 5.52 0 0 1-2.39 3.62v3h3.87c2.26-2.08 3.56-5.15 3.56-8.65z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.87-3c-1.07.72-2.44 1.15-4.06 1.15-3.12 0-5.77-2.11-6.72-4.95H1.28v3.09A12 12 0 0 0 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.29a7.18 7.18 0 0 1 0-4.58V6.62H1.28a12 12 0 0 0 0 10.76l4-3.09z"/>
+              <path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.58 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.28 6.62l4 3.09C6.23 6.87 8.88 4.76 12 4.76z"/>
+            </svg>
+            <span>Masuk Google</span>
+          </button>
+          <button type="button" id="driverNavBtn" class="btn-pill btn-soft" style="display:none;">Driver</button>
+          <button type="button" id="adminNavBtn" class="btn-pill btn-soft" style="display:none;">Admin</button>
+          <button type="button" id="authNavBtn" class="btn-pill btn-primary">Driver / Admin</button>
+        </div>
+      </div>
+    </header>
 
+    <main class="app-shell">
+      <!-- ====================================================================
+           VIEW 1: BERANDA & ORDER LANGSUNG WHATSAPP (MOBILE-FIRST 480PX)
+           ==================================================================== -->
+      <section id="view-home" class="view-section active">
+        <!-- BAR AKUN GOOGLE PELANGGAN (SELALU TERLIHAT DI BAGIAN PALING ATAS HALAMAN) -->
+        <div id="customerGoogleTopBar" class="google-user-bar">
+          <!-- Saat pelanggan belum login -->
+          <div id="googleBarLoggedOut" class="google-bar-section">
+            <div class="google-user-info">
+              <div class="google-user-avatar" style="background:#FFFFFF;">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.45a5.52 5.52 0 0 1-2.39 3.62v3h3.87c2.26-2.08 3.56-5.15 3.56-8.65z"/>
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.87-3c-1.07.72-2.44 1.15-4.06 1.15-3.12 0-5.77-2.11-6.72-4.95H1.28v3.09A12 12 0 0 0 12 24z"/>
+                  <path fill="#FBBC05" d="M5.28 14.29a7.18 7.18 0 0 1 0-4.58V6.62H1.28a12 12 0 0 0 0 10.76l4-3.09z"/>
+                  <path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.58 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.28 6.62l4 3.09C6.23 6.87 8.88 4.76 12 4.76z"/>
+                </svg>
+              </div>
+              <div class="google-user-meta">
+                <div class="google-user-name">Hai warga Cepu!</div>
+                <div class="google-user-email">Masuk Google dulu yuk biar bisa pesan</div>
+              </div>
+            </div>
+            <button type="button" id="googleTopLoginBtn" class="btn-pill btn-google-mini">
+              <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.45a5.52 5.52 0 0 1-2.39 3.62v3h3.87c2.26-2.08 3.56-5.15 3.56-8.65z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.87-3c-1.07.72-2.44 1.15-4.06 1.15-3.12 0-5.77-2.11-6.72-4.95H1.28v3.09A12 12 0 0 0 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.29a7.18 7.18 0 0 1 0-4.58V6.62H1.28a12 12 0 0 0 0 10.76l4-3.09z"/>
+                <path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.58 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.28 6.62l4 3.09C6.23 6.87 8.88 4.76 12 4.76z"/>
+              </svg>
+              <span>Masuk dengan Google</span>
+            </button>
+          </div>
+
+          <!-- Saat pelanggan sudah login -->
+          <div id="googleBarLoggedIn" class="google-bar-section" style="display:none;">
+            <div class="google-user-info">
+              <div class="google-user-avatar" id="googleUserAvatar">G</div>
+              <div class="google-user-meta">
+                <div class="google-user-name" id="googleUserName">Pelanggan SuruhAja</div>
+                <div class="google-user-email" id="googleUserEmail">email@gmail.com</div>
+              </div>
+            </div>
+            <button type="button" id="googleLogoutTopBtn" class="btn-pill btn-danger-soft" style="padding:7px 12px; font-size:11.5px;">Keluar</button>
+          </div>
+        </div>
+
+        <!-- HERO BANNER -->
+        <div class="hero-banner scroll-reveal">
+          <div class="hero-grid">
+            <div>
+              <div class="hero-badges-row">
+                <div id="heroStoreStatusPill" class="store-status-pill is-open">
+                  <span class="status-dot"></span>
+                  <span id="heroStoreStatusText">Lagi Buka • Kurir siap meluncur</span>
+                </div>
+                <div class="hero-badge">Area Cepu &amp; Sekitarnya</div>
+              </div>
+              <h2 class="hero-title">Hai, mau kemana atau nitip apa hari ini?</h2>
+              <p class="hero-desc" id="heroDescText">
+                Tinggal tap layanan, geser pin Jemput di mana &amp; Antar ke mana di peta Cepu, ongkos langsung muncul dan siap kirim ke WhatsApp!
+              </p>
+              <div class="hero-cta-row">
+                <button type="button" id="heroOrderNowBtn" class="btn-hero-white">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                  <span>Pesan Sekarang</span>
+                </button>
+                <button type="button" id="heroOrdersBtn" class="btn-hero-ghost">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+                  <span>Pesanan Saya</span>
+                </button>
+              </div>
+            </div>
+            <div class="hero-snapshot-card" id="heroSnapshotCard">
+              <div class="hero-snap-row">
+                <span>Tarif Mulai</span>
+                <strong id="heroSnapMinPrice">Rp 6.000</strong>
+              </div>
+              <div class="hero-snap-row">
+                <span>Driver Siap</span>
+                <strong id="heroSnapDrivers">0 Kurir Siap</strong>
+              </div>
+              <div class="hero-snap-row">
+                <span>Promo Hari Ini</span>
+                <strong id="heroSnapPromo">-</strong>
+              </div>
+              <div class="hero-snap-row">
+                <span>Pembayaran</span>
+                <strong>Tunai / QRIS / Transfer</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KATEGORI LAYANAN (FLAT VECTOR SVG PASTEL CARDS) -->
+        <div id="servicesSection" class="mt-20 scroll-reveal">
+          <div class="section-head">
+            <h2>Mau ngapain hari ini?</h2>
+            <span class="text-muted">Tap untuk pesan</span>
+          </div>
+          <div class="services-grid" id="servicesGrid">
+            <!-- Layanan di-render oleh JS -->
+          </div>
+        </div>
+
+        <!-- TOMBOL CEPAT "ORDER KILAT" -->
+        <div class="mt-20 scroll-reveal">
+          <div class="section-head">
+            <h2>Lagi butuh apa nih?</h2>
+          </div>
+          <div class="quick-chips">
+            <button type="button" class="quick-chip" onclick="applyQuickTask('SRV-BELI', 'Titip beli makan / minuman (nama warung & menu): ')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EE2737" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18a8 8 0 0 1-8 8h-2a8 8 0 0 1-8-8Z"/><path d="M12 3v3M8 4v2M16 4v2"/></svg>
+              <span>Nitip Makan</span>
+            </button>
+            <button type="button" class="quick-chip" onclick="applyQuickTask('SRV-BELI', 'Beli & antar Galon Air / Gas LPG: ')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0088FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+              <span>Beli Galon / Gas</span>
+            </button>
+            <button type="button" class="quick-chip" onclick="applyQuickTask('SRV-BELI', 'Titip belanja kebutuhan harian / minimarket: ')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00AA13" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              <span>Belanja Harian</span>
+            </button>
+            <button type="button" class="quick-chip" onclick="applyQuickTask('SRV-ANTAR', 'Kirim paket / barang area Cepu: ')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0088FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              <span>Kirim Paket</span>
+            </button>
+            <button type="button" class="quick-chip" onclick="applyQuickTask('SRV-ANTAR', 'Antar dokumen / berkas penting area Cepu: ')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00AA13" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span>Antar Dokumen</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- KULINER & WARUNG HITS CEPU -->
+        <div id="partnersSection" class="mt-20 scroll-reveal">
+          <div class="section-head">
+            <h2>Jajanan &amp; Warung Hits Cepu</h2>
+            <span class="text-muted">Tap buat nitip</span>
+          </div>
+          <div class="partners-grid" id="partnersGrid">
+            <!-- Warung rekanan di-render oleh JS -->
+          </div>
+        </div>
+
+        <!-- INFO PEMBAYARAN & 3 LANGKAH ORDER -->
+        <div class="card-box scroll-reveal">
+          <div class="section-head" style="margin-bottom:4px;">
+            <h2>Gampang banget, cuma 3 langkah</h2>
+            <span class="badge badge-done">Tunai / QRIS</span>
+          </div>
+          <p class="text-muted">Nggak perlu ribet, ongkos langsung kelihatan di peta.</p>
+          <div class="steps-grid">
+            <div class="step-card">
+              <div class="step-num">1</div>
+              <div>
+                <h4>Pilih layanan &amp; titik peta</h4>
+                <p>Tentukan Jemput di mana &amp; Antar ke mana di peta Cepu.</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">2</div>
+              <div>
+                <h4>Cek ongkos otomatis</h4>
+                <p>Tarif Rupiah langsung tampil di garis rute sesuai jarak jalan.</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">3</div>
+              <div>
+                <h4>Klik Pesan Sekarang</h4>
+                <p>Pesanan langsung masuk WhatsApp driver, bayar tunai atau QRIS.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FORM ORDER + PETA INTERAKTIF CEPU + BOTTOM SHEET PANEL -->
+        <div id="orderFormSection" class="card-box scroll-reveal">
+          <div id="closedNoticeBanner" class="closed-notice-banner">
+            Saat ini layanan lagi istirahat sebentar. Kamu tetap bisa kirim pesanan untuk antrean saat buka kembali.
+          </div>
+          <div class="section-head" style="margin-bottom:12px;">
+            <div>
+              <h2>Pesan Sekarang</h2>
+              <p class="text-muted">Atur titik jemput &amp; tujuan di peta Cepu, ongkos langsung terhitung otomatis.</p>
+            </div>
+          </div>
+
+          <!-- GERBANG WAJIB LOGIN GOOGLE PELANGGAN (FIREBASE AUTH) -->
+          <div id="customerGoogleGate" class="google-gate-box">
+            <div class="google-gate-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.45a5.52 5.52 0 0 1-2.39 3.62v3h3.87c2.26-2.08 3.56-5.15 3.56-8.65z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.87-3c-1.07.72-2.44 1.15-4.06 1.15-3.12 0-5.77-2.11-6.72-4.95H1.28v3.09A12 12 0 0 0 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.29a7.18 7.18 0 0 1 0-4.58V6.62H1.28a12 12 0 0 0 0 10.76l4-3.09z"/>
+                <path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.58 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.28 6.62l4 3.09C6.23 6.87 8.88 4.76 12 4.76z"/>
+              </svg>
+            </div>
+            <h3>Masuk dulu yuk sebelum pesan</h3>
+            <p>
+              Pakai akun Google kamu sekali klik biar nama &amp; email tercatat rapi saat pesan driver.
+            </p>
+            <button type="button" id="googleLoginGateBtn" class="btn-google-auth">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.45a5.52 5.52 0 0 1-2.39 3.62v3h3.87c2.26-2.08 3.56-5.15 3.56-8.65z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.87-3c-1.07.72-2.44 1.15-4.06 1.15-3.12 0-5.77-2.11-6.72-4.95H1.28v3.09A12 12 0 0 0 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.29a7.18 7.18 0 0 1 0-4.58V6.62H1.28a12 12 0 0 0 0 10.76l4-3.09z"/>
+                <path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.58 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.28 6.62l4 3.09C6.23 6.87 8.88 4.76 12 4.76z"/>
+              </svg>
+              <span>Masuk dengan Google</span>
+            </button>
+          </div>
+
+          <form id="orderForm" style="display:none;">
+            <!-- Pilih Layanan -->
+            <div class="form-group">
+              <label for="orderServiceSelect">Layanan yang Dipilih</label>
+              <select id="orderServiceSelect" class="form-control" required></select>
+            </div>
+
+            <!-- Peta Cepu + Curved Bottom Sheet Panel -->
+            <div class="map-order-shell">
+              <div class="map-top-controls">
+                <div class="map-toolbar">
+                  <div class="map-mode-group">
+                    <button type="button" id="pinModePickupBtn" class="map-mode-btn active-pickup">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
+                      <span>Jemput di mana?</span>
+                    </button>
+                    <button type="button" id="pinModeDropoffBtn" class="map-mode-btn">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                      <span>Antar ke mana?</span>
+                    </button>
+                  </div>
+                  <button type="button" id="gpsLocateBtn" class="btn-pill btn-soft" style="padding:6px 10px; font-size:11.5px;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+                    <span>Lokasiku</span>
+                  </button>
+                </div>
+
+                <div class="map-search-wrap">
+                  <div class="map-search-row">
+                    <input type="text" id="mapSearchInput" class="form-control" placeholder="Cari tempat di Cepu (Stasiun, Balun, Pasar)..." />
+                    <button type="button" id="mapSearchBtn" class="btn-pill btn-soft" style="padding:8px 12px;">Cari</button>
+                  </div>
+                  <div id="mapSearchResults" class="map-search-results"></div>
+                </div>
+              </div>
+
+              <div id="cepuMap" aria-label="Peta Interaktif Area Cepu"></div>
+
+              <!-- PANEL BAWAH MELENGKUNG (BOTTOM SHEET ALA GRAB / GOJEK) -->
+              <div class="order-bottom-sheet">
+                <div class="sheet-handle"></div>
+
+                <div class="map-coords-grid">
+                  <div class="map-coord-card" id="pickupCoordCard">
+                    <strong style="color:#00AA13;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
+                      <span>Jemput di mana? (geser pin hijau)</span>
+                    </strong>
+                    <span id="pickupAddrDisplay">Pusat Kota Cepu (-7.1495, 111.5905)</span>
+                  </div>
+                  <div class="map-coord-card" id="dropoffCoordCard">
+                    <strong style="color:#EE2737;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                      <span>Antar ke mana? (geser pin merah)</span>
+                    </strong>
+                    <span id="dropoffAddrDisplay">Area Cepu (-7.1375, 111.6075)</span>
+                  </div>
+                </div>
+
+                <div style="margin-top:10px; padding:8px 11px; border-radius:12px; background:var(--bg-card-tint); display:flex; justify-content:space-between; align-items:center; gap:6px; font-size:12px;">
+                  <span class="text-muted" id="routeDistanceDisplay">Menghitung rute...</span>
+                  <strong style="color:var(--primary);" id="routeFarePreviewDisplay">Estimasi: Rp 0</strong>
+                </div>
+
+                <!-- Pilih Driver -->
+                <div class="form-group mt-12">
+                  <label>Pilih Driver Cepu</label>
+                  <input type="hidden" id="orderDriverSelect" value="" />
+                  <div id="driverCardsGrid" class="driver-cards-grid"></div>
+                  <small id="driverInfoHint" class="text-muted">Pesanan langsung diteruskan ke WhatsApp driver pilihanmu.</small>
+                </div>
+
+                <!-- Detail Pesanan / Barang -->
+                <div class="form-group mt-12">
+                  <label for="orderDetails">Mau titip atau kirim apa? *</label>
+                  <textarea id="orderDetails" class="form-control" placeholder="Misal: Jemput di depan stasiun, atau titip beli Nasi Goreng 2 bungkus..." required></textarea>
+                </div>
+
+                <!-- Nama, Nomor WhatsApp Wajib, & Catatan -->
+                <div class="form-grid two-col mt-12">
+                  <div class="form-group">
+                    <label for="orderCustName">Nama panggilan kamu *</label>
+                    <input type="text" id="orderCustName" class="form-control" placeholder="Nama kamu" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="orderCustPhone">Nomor WhatsApp Aktif *</label>
+                    <input type="tel" id="orderCustPhone" class="form-control" placeholder="08xxxxxxxxxx" required />
+                  </div>
+                </div>
+                <div class="form-group mt-12">
+                  <label for="orderNotes">Catatan buat driver (opsional)</label>
+                  <input type="text" id="orderNotes" class="form-control" placeholder="Misal: bayar QRIS / tidak pedas" />
+                </div>
+
+                <!-- Kode Promo -->
+                <div class="form-group mt-12">
+                  <label for="orderPromoInput">Punya kode promo? (opsional)</label>
+                  <div class="promo-input-row">
+                    <input type="text" id="orderPromoInput" class="form-control" placeholder="Contoh: SURUHHARIINI" />
+                    <button type="button" id="applyPromoBtn" class="btn-pill btn-soft">Pakai</button>
+                  </div>
+                  <small id="promoFeedback" class="text-muted"></small>
+                  <div id="promoChipsRow" class="promo-chips-row"></div>
+                </div>
+
+                <!-- Ringkasan Estimasi Ongkir -->
+                <div class="summary-box">
+                  <div class="summary-row">
+                    <span id="sumBasePriceLabel">Tarif Minimal</span>
+                    <span id="sumBasePrice">Rp 0</span>
+                  </div>
+                  <div class="summary-row" id="sumExtraDistRow" style="display:none;">
+                    <span id="sumExtraDistLabel">Tambahan Jarak</span>
+                    <span id="sumExtraDistPrice">Rp 0</span>
+                  </div>
+                  <div class="summary-row" id="sumDiscountRow" style="display:none; color: var(--success); font-weight:700;">
+                    <span>Potongan Promo</span>
+                    <span id="sumDiscount">-Rp 0</span>
+                  </div>
+                  <div class="summary-row total">
+                    <span id="sumTotalLabel">Estimasi Ongkos</span>
+                    <span id="sumTotal">Rp 0</span>
+                  </div>
+                </div>
+
+                <button type="submit" id="submitOrderBtn" class="btn-pill btn-primary mt-12" style="width:100%; padding:14px; font-size:14.5px;">
+                  Pesan Sekarang
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- TESTIMONI WARGA CEPU -->
+        <div id="testimonialsSection" class="mt-20 scroll-reveal">
+          <div class="section-head">
+            <h2>Kata Warga Cepu</h2>
+            <span class="text-muted">Ulasan pelanggan</span>
+          </div>
+          <div class="testimonials-grid" id="testimonialsGrid">
+            <!-- Testimoni di-render oleh JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           VIEW 2: RIWAYAT PESANAN PELANGGAN
+           ==================================================================== -->
+      <section id="view-orders" class="view-section">
+        <div class="card-box">
+          <div class="flex-between" style="flex-wrap:wrap; margin-bottom:14px;">
+            <div>
+              <h2>Pesanan Kamu</h2>
+              <p class="text-muted">Riwayat pesanan yang tersimpan di HP ini.</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button type="button" id="refreshCustOrdersBtn" class="btn-pill btn-soft" style="padding:7px 12px; font-size:12px;">Refresh Status</button>
+              <button type="button" id="clearOrdersBtn" class="btn-pill btn-danger-soft" style="display:none; padding:7px 12px; font-size:12px;">Hapus</button>
+              <button type="button" id="newOrderFromOrdersBtn" class="btn-pill btn-primary" style="padding:7px 12px; font-size:12px;">+ Pesan Baru</button>
+            </div>
+          </div>
+          <div id="customerOrdersList">
+            <p class="text-muted">Memuat riwayat pesanan...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           VIEW 2B: DASHBOARD MITRA DRIVER (KHUSUS ROLE DRIVER)
+           ==================================================================== -->
+      <section id="view-driver" class="view-section">
+        <div class="card-box">
+          <div class="flex-between" style="flex-wrap:wrap; margin-bottom:14px;">
+            <div>
+              <h2>Dashboard Mitra Driver</h2>
+              <p class="text-muted" id="driverDashSubtitle">Atur status siap jalan dan pantau pesanan masuk.</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button type="button" id="driverRefreshBtn" class="btn-pill btn-soft">Refresh</button>
+              <button type="button" id="driverHomeBtn" class="btn-pill btn-dark">Beranda</button>
+            </div>
+          </div>
+
+          <div id="driverPendingBanner" style="display:none; background:#FEF3C7; border:1px solid #FDE68A; color:#92400E; padding:18px 16px; border-radius:16px; text-align:center; margin-bottom:16px;">
+            <div style="width:48px; height:48px; border-radius:14px; background:#FDE68A; color:#92400E; display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <h3 style="font-size:15.5px; font-weight:800; margin-bottom:6px;">Akun Anda Masih Berstatus PENDING</h3>
+            <p style="font-size:12.5px; line-height:1.55; margin:0 auto 12px; max-width:360px;">
+              Terima kasih sudah mendaftar sebagai Mitra Driver SuruhAja Cepu. Anda baru dapat melihat dan mengambil order setelah Admin menyetujui dan mengaktifkan akun Anda menjadi <strong>AKTIF</strong>.
+            </p>
+            <a id="driverPendingWaLink" href="javascript:void(0)" target="_blank" rel="noopener" class="btn-pill btn-primary" style="font-size:12.5px;">Hubungi WhatsApp Admin</a>
+          </div>
+
+          <div id="driverOperationalBox">
+            <div class="admin-status-bar">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div class="driver-avatar-circle" id="driverDashAvatar" style="width:54px; height:54px;">
+                  <svg width="28" height="28" viewBox="0 0 40 40" fill="none"><path d="M10 21C10 14.9 14.5 10 20 10C25.5 10 30 14.9 30 21V24H10V21Z" fill="#064E3B"/><rect x="13" y="17" width="14" height="5" rx="2.5" fill="#A7F3D0"/><path d="M9 33C9 28.5 13.5 26 20 26C26.5 26 31 28.5 31 33H9Z" fill="#00AA13"/></svg>
+                </div>
+                <div>
+                  <strong style="font-size:13.5px;" id="driverMyStatusLabel">Status Anda: Standby (Siap Jalan)</strong>
+                  <div class="text-muted" id="driverMyInfoLine">Area Cepu</div>
+                  <div style="margin-top:6px;">
+                    <label class="btn-pill btn-soft" style="padding:5px 11px; font-size:11.5px; cursor:pointer;">
+                      Ganti Foto Profil
+                      <input type="file" id="driverDashPhotoInput" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="handleDriverUpdateOwnPhoto(event)" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <button type="button" id="drvStatusBtnStandby" class="btn-pill btn-soft" onclick="changeMyDriverStatus('Standby')">Standby</button>
+                <button type="button" id="drvStatusBtnSibuk" class="btn-pill btn-soft" onclick="changeMyDriverStatus('Sibuk')">Sibuk</button>
+                <button type="button" id="drvStatusBtnNonaktif" class="btn-pill btn-danger-soft" onclick="changeMyDriverStatus('Nonaktif')">Off / Libur</button>
+              </div>
+            </div>
+
+            <div class="filter-bar">
+              <h3 style="font-size:14.5px;">Pesanan Masuk &amp; Antrean Umum</h3>
+              <div class="filter-pills" id="driverOrderFilters">
+                <button type="button" class="filter-pill active" onclick="setDriverOrderFilter('ALL', this)">Semua</button>
+                <button type="button" class="filter-pill" onclick="setDriverOrderFilter('Baru', this)">Baru</button>
+                <button type="button" class="filter-pill" onclick="setDriverOrderFilter('Diproses', this)">Diproses</button>
+                <button type="button" class="filter-pill" onclick="setDriverOrderFilter('Selesai', this)">Selesai</button>
+              </div>
+            </div>
+            <div id="driverOrdersList">
+              <p class="text-muted">Memuat pesanan driver...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           VIEW 3: PROFIL & AKUN MITRA DRIVER / ADMIN
+           ==================================================================== -->
+      <section id="view-profile" class="view-section">
+        <div class="card-box">
+          <!-- Saat belum login -->
+          <div id="profileLoggedOut" style="text-align:center; padding:22px 10px;">
+            <div style="width:68px; height:68px; border-radius:20px; background:#ECFDF5; display:inline-flex; align-items:center; justify-content:center; margin-bottom:12px;">
+              <svg width="42" height="42" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                <path d="M10 21C10 14.9 14.5 10 20 10C25.5 10 30 14.9 30 21V24H10V21Z" fill="#064E3B"/>
+                <rect x="13" y="16.5" width="14" height="5" rx="2.5" fill="#A7F3D0"/>
+                <path d="M8.5 34C8.5 29 13.5 26.2 20 26.2C26.5 26.2 31.5 29 31.5 34H8.5Z" fill="#00AA13"/>
+                <path d="M20 26.2V34" stroke="#064E3B" stroke-width="1.8"/>
+              </svg>
+            </div>
+            <h2 style="margin-bottom:6px; font-size:18px;">Area Mitra Driver &amp; Admin</h2>
+            <p class="text-muted" style="margin:0 auto 18px;">
+              Khusus pendaftaran mitra driver Cepu dan pengelolaan aplikasi Admin. Pelanggan cukup masuk dengan Google di Beranda.
+            </p>
+            <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+              <button type="button" id="profileLoginBtn" class="btn-pill btn-primary">Masuk Driver / Admin</button>
+              <button type="button" id="profileRegisterBtn" class="btn-pill btn-soft">Daftar Jadi Driver</button>
+            </div>
+          </div>
+
+          <!-- Saat sudah login -->
+          <div id="profileLoggedIn" style="display:none;">
+            <div style="display:flex; align-items:center; gap:14px; padding-bottom:16px; border-bottom:1px solid var(--border-subtle);">
+              <div id="profileAvatar" style="width:52px; height:52px; border-radius:16px; background:#00AA13; color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800; flex-shrink:0;">
+                A
+              </div>
+              <div style="flex:1; min-width:0;">
+                <h3 id="profileName" style="font-size:16.5px; font-weight:800;">Pengguna</h3>
+                <p id="profileEmail" class="text-muted" style="word-break:break-all;">email@contoh.com</p>
+                <span id="profileRoleBadge" class="badge badge-done" style="margin-top:4px;">Driver</span>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:16px;">
+              <button type="button" id="profileDriverBtn" class="btn-pill btn-primary" style="display:none; width:100%; padding:13px;">
+                Buka Dashboard Driver
+              </button>
+              <button type="button" id="profileAdminBtn" class="btn-pill btn-primary" style="display:none; width:100%; padding:13px;">
+                Buka Admin Panel
+              </button>
+              <button type="button" id="profileOrdersBtn" class="btn-pill btn-soft" style="width:100%; padding:12px;">
+                Lihat Riwayat Pesanan
+              </button>
+              <button type="button" id="profileLogoutBtn" class="btn-pill btn-danger-soft" style="width:100%; padding:12px;">
+                Keluar Akun
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           VIEW 4: ADMIN PANEL LENGKAP (KHUSUS ROLE ADMIN)
+           ==================================================================== -->
+      <section id="view-admin" class="view-section">
+        <div class="card-box">
+          <div class="flex-between" style="flex-wrap:wrap; margin-bottom:14px;">
+            <div>
+              <h2>Admin Panel SuruhAja Cepu</h2>
+              <p class="text-muted">Kelola pesanan, tarif jarak, promo, driver, WA, logo &amp; footer.</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button type="button" id="adminRefreshBtn" class="btn-pill btn-soft">Refresh</button>
+              <button type="button" id="adminHomeBtn" class="btn-pill btn-dark">Ke Beranda</button>
+            </div>
+          </div>
+
+          <div class="admin-tabs">
+            <button type="button" class="admin-tab active" data-atab="dashboard">Ringkasan</button>
+            <button type="button" class="admin-tab" data-atab="orders">Pesanan</button>
+            <button type="button" class="admin-tab" data-atab="drivers">Driver</button>
+            <button type="button" class="admin-tab" data-atab="services">Pengaturan Layanan &amp; Tarif</button>
+            <button type="button" class="admin-tab" data-atab="promos">Promo</button>
+            <button type="button" class="admin-tab" data-atab="partners">Rekanan &amp; Ulasan</button>
+            <button type="button" class="admin-tab" data-atab="settings">WA, Logo &amp; Footer</button>
+          </div>
+
+          <!-- TAB 1: DASHBOARD -->
+          <div id="atab-dashboard" class="admin-panel-tab">
+            <div class="admin-status-bar">
+              <div>
+                <strong style="font-size:13.5px;" id="adminStatusLabel">Status Operasional: SEDANG BUKA</strong>
+                <div class="text-muted" id="adminStatusNotePreview">Kurir Siap Jalan (07.00 - 21.00 WIB)</div>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                <input type="text" id="adminStatusNoteInput" class="form-control" style="flex:1; min-width:170px; padding:8px 12px; font-size:12.5px; background:var(--bg-surface);" placeholder="Catatan jam buka/istirahat" />
+                <button type="button" id="toggleStoreStatusBtn" class="btn-pill btn-danger-soft" onclick="toggleStoreStatusUI()">Ubah Jadi Tutup</button>
+              </div>
+            </div>
+
+            <div class="kpi-grid">
+              <div class="kpi-card"><span>Total Pesanan</span><strong id="kpiTotalOrders">0</strong></div>
+              <div class="kpi-card"><span>Pesanan Hari Ini</span><strong id="kpiTodayOrders">0</strong></div>
+              <div class="kpi-card"><span>Driver Terdaftar</span><strong id="kpiTotalDrivers">0</strong></div>
+              <div class="kpi-card"><span>Layanan Aktif</span><strong id="kpiActiveServices">0</strong></div>
+            </div>
+            <h3 style="font-size:14.5px; margin-bottom:10px;">Pesanan Terbaru</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Kode</th><th>Pelanggan</th><th>Layanan</th><th>Ongkir</th><th>Status</th></tr>
+                </thead>
+                <tbody id="adminRecentOrdersBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 2: PESANAN -->
+          <div id="atab-orders" class="admin-panel-tab" style="display:none;">
+            <div class="filter-bar">
+              <div class="filter-pills" id="adminOrderFilters">
+                <button type="button" class="filter-pill active" onclick="setAdminOrderFilter('ALL', this)">Semua</button>
+                <button type="button" class="filter-pill" onclick="setAdminOrderFilter('Baru', this)">Baru</button>
+                <button type="button" class="filter-pill" onclick="setAdminOrderFilter('Diproses', this)">Diproses</button>
+                <button type="button" class="filter-pill" onclick="setAdminOrderFilter('Selesai', this)">Selesai</button>
+                <button type="button" class="filter-pill" onclick="setAdminOrderFilter('Dibatalkan', this)">Dibatalkan</button>
+              </div>
+              <input type="search" id="adminOrderSearch" class="form-control" style="width:100%; padding:7px 12px; font-size:12.5px;" placeholder="Cari kode, nama, email, atau item..." oninput="renderAdminOrdersTable()" />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Kode &amp; Waktu</th><th>Pelanggan</th><th>Layanan &amp; Detail</th><th>Ongkir</th><th>Status</th></tr>
+                </thead>
+                <tbody id="adminOrdersBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 2B: KELOLA DRIVER -->
+          <div id="atab-drivers" class="admin-panel-tab" style="display:none;">
+            <div style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:14px; padding:12px 14px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+              <div>
+                <div style="font-size:13px; font-weight:800; color:#064E3B;">Kuota Maksimal Mitra Driver (MaxDriverQuota)</div>
+                <div class="text-muted" id="adminQuotaSummary" style="font-size:12px; color:#065F46;">Terisi: 0 / 15 (Aktif: 0 · Pending: 0)</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input type="number" id="adminMaxDriverQuota" class="form-control" min="1" max="1000" value="15" style="width:82px; padding:7px 10px; font-size:13px; font-weight:700; text-align:center; background:#fff;" />
+                <button type="button" id="saveQuotaBtn" class="btn-pill btn-primary" style="padding:8px 14px; font-size:12px;" onclick="saveAdminDriverQuotaUI()">Simpan Kuota</button>
+              </div>
+            </div>
+
+            <div class="flex-between" style="margin-bottom:12px;">
+              <div>
+                <h3 style="font-size:14.5px;">Daftar Driver Cepu</h3>
+                <p class="text-muted">Setujui pendaftar PENDING menjadi AKTIF agar dapat melihat &amp; mengambil order.</p>
+              </div>
+              <button type="button" class="btn-pill btn-primary" onclick="openDriverModal()">+ Tambah</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Nama &amp; Email</th><th>Nomor WA</th><th>Motor / Pelat / Area</th><th>Status Mitra</th><th>Kondisi</th><th>Aksi</th></tr>
+                </thead>
+                <tbody id="adminDriversBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 3: PENGATURAN LAYANAN & TARIF -->
+          <div id="atab-services" class="admin-panel-tab" style="display:none;">
+            <div class="flex-between" style="flex-wrap:wrap; margin-bottom:12px;">
+              <div>
+                <h3 style="font-size:14.5px;">Pengaturan Layanan &amp; Tarif (Tabel: pengaturan_tarif)</h3>
+                <p class="text-muted">Atur tarif minimal, jarak minimal (km), tarif per km, dan status Aktif/Nonaktif.</p>
+              </div>
+              <button type="button" class="btn-pill btn-primary" onclick="openServiceModal()">+ Tambah Layanan</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Ikon &amp; Layanan</th><th>Tarif Minimal</th><th>Jarak Minimal</th><th>Tarif / Km</th><th>Status</th><th>Aksi</th></tr>
+                </thead>
+                <tbody id="adminServicesBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 4: PROMO -->
+          <div id="atab-promos" class="admin-panel-tab" style="display:none;">
+            <div class="flex-between" style="margin-bottom:12px;">
+              <p class="text-muted">Kelola kode voucher potongan ongkir.</p>
+              <button type="button" class="btn-pill btn-primary" onclick="openPromoModal()">+ Tambah Promo</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Kode</th><th>Judul</th><th>Diskon</th><th>Min. Order</th><th>Status</th><th>Aksi</th></tr>
+                </thead>
+                <tbody id="adminPromosBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 5: WARUNG REKANAN & TESTIMONI -->
+          <div id="atab-partners" class="admin-panel-tab" style="display:none;">
+            <div class="flex-between" style="margin-bottom:10px;">
+              <div>
+                <h3 style="font-size:14.5px;">Warung Rekanan Cepu</h3>
+                <p class="text-muted">Daftar warung/toko rekanan di beranda.</p>
+              </div>
+              <button type="button" class="btn-pill btn-primary" onclick="openPartnerModal()">+ Tambah</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Warung / Toko</th><th>Menu Saran</th><th>Badge</th><th>Status</th><th>Aksi</th></tr>
+                </thead>
+                <tbody id="adminPartnersBody"></tbody>
+              </table>
+            </div>
+
+            <div class="flex-between mt-20" style="margin-bottom:10px;">
+              <div>
+                <h3 style="font-size:14.5px;">Testimoni Warga Cepu</h3>
+                <p class="text-muted">Ulasan singkat pelanggan.</p>
+              </div>
+              <button type="button" class="btn-pill btn-primary" onclick="openTestimonialModal()">+ Tambah</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Nama Pelanggan</th><th>Rating</th><th>Ulasan</th><th>Status</th><th>Aksi</th></tr>
+                </thead>
+                <tbody id="adminTestimonialsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 6: PENGATURAN WA, LOGO & FOOTER -->
+          <div id="atab-settings" class="admin-panel-tab" style="display:none;">
+            <div class="form-grid">
+              <div style="background:var(--bg-input); padding:14px; border-radius:16px;">
+                <h4 style="margin-bottom:10px;">Logo Aplikasi</h4>
+                <div class="img-preview-box" id="adminLogoPreview" style="height:90px; margin-bottom:10px;">
+                  Logo Default Aktif
+                </div>
+                <input type="file" id="logoFileInput" accept="image/jpeg,image/png,image/webp" class="form-control" style="background:var(--bg-surface);" onchange="previewLogoFile(event)" />
+                <button type="button" id="uploadLogoBtn" class="btn-pill btn-primary mt-12" style="width:100%;" onclick="handleUploadLogo()">Upload &amp; Simpan Logo</button>
+              </div>
+
+              <form id="changeAdminPwdForm" onsubmit="handleChangeAdminPassword(event)" style="background:var(--bg-input); padding:14px; border-radius:16px;">
+                <h4 style="margin-bottom:10px;">Ganti Password Admin</h4>
+                <div class="form-group">
+                  <label for="oldAdminPwd">Password Lama</label>
+                  <div class="password-wrap">
+                    <input type="password" id="oldAdminPwd" class="form-control" style="background:var(--bg-surface);" placeholder="Masukkan password lama" required />
+                    <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('oldAdminPwd', this)" aria-label="Tampilkan Password">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="form-group mt-12">
+                  <label for="newAdminPwd">Password Baru</label>
+                  <div class="password-wrap">
+                    <input type="password" id="newAdminPwd" class="form-control" style="background:var(--bg-surface);" placeholder="Minimal 4 karakter" required />
+                    <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('newAdminPwd', this)" aria-label="Tampilkan Password">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="form-group mt-12">
+                  <label for="confirmAdminPwd">Ulangi Password Baru</label>
+                  <div class="password-wrap">
+                    <input type="password" id="confirmAdminPwd" class="form-control" style="background:var(--bg-surface);" placeholder="Ketik ulang password baru" required />
+                    <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('confirmAdminPwd', this)" aria-label="Tampilkan Password">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <button type="submit" id="changePwdBtn" class="btn-pill btn-dark mt-12" style="width:100%;">Simpan Password Baru</button>
+              </form>
+
+              <form id="adminSettingsForm" style="background:var(--bg-input); padding:14px; border-radius:16px;">
+                <h4 style="margin-bottom:10px;">Pengaturan WhatsApp &amp; Footer</h4>
+                <div class="form-group">
+                  <label>Nomor WhatsApp Tujuan Order (628xxx)</label>
+                  <input type="text" id="setWaNumber" class="form-control" style="background:var(--bg-surface);" required />
+                </div>
+                <div class="form-group mt-12">
+                  <label>Tagline Aplikasi</label>
+                  <input type="text" id="setTagline" class="form-control" style="background:var(--bg-surface);" />
+                </div>
+                <div class="form-group mt-12">
+                  <label>Nama Brand Footer</label>
+                  <input type="text" id="setFooterBrand" class="form-control" style="background:var(--bg-surface);" />
+                </div>
+                <div class="form-group mt-12">
+                  <label>Deskripsi Footer</label>
+                  <textarea id="setFooterDesc" class="form-control" style="background:var(--bg-surface); min-height:60px;"></textarea>
+                </div>
+                <div class="form-group mt-12">
+                  <label>Alamat / Area Layanan</label>
+                  <input type="text" id="setFooterAddr" class="form-control" style="background:var(--bg-surface);" />
+                </div>
+                <div class="form-grid two-col mt-12">
+                  <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="setFooterEmail" class="form-control" style="background:var(--bg-surface);" />
+                  </div>
+                  <div class="form-group">
+                    <label>Instagram</label>
+                    <input type="text" id="setFooterIg" class="form-control" style="background:var(--bg-surface);" />
+                  </div>
+                </div>
+                <div class="form-group mt-12">
+                  <label>Teks Copyright</label>
+                  <input type="text" id="setFooterCopy" class="form-control" style="background:var(--bg-surface);" />
+                </div>
+
+                <div style="margin-top:14px; padding-top:12px; border-top:1px dashed var(--border-color);">
+                  <h4 style="margin-bottom:8px;">Kuota Mitra Driver &amp; Saweria</h4>
+                  <div class="form-group">
+                    <label for="setMaxDriverQuota">Kuota Maksimal Mitra Driver (MaxDriverQuota)</label>
+                    <input type="number" id="setMaxDriverQuota" class="form-control" min="1" max="1000" value="15" style="background:var(--bg-surface);" required />
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Link Saweria (Kosongkan jika disembunyikan)</label>
+                    <input type="url" id="setSaweriaUrl" class="form-control" style="background:var(--bg-surface);" placeholder="https://saweria.co/usernamekamu" />
+                  </div>
+                  <div class="form-group mt-12">
+                    <label>Teks Ajakan Dukungan</label>
+                    <input type="text" id="setSaweriaText" class="form-control" style="background:var(--bg-surface);" placeholder="Suka layanan SuruhAja? Traktir kopi pengembang..." />
+                  </div>
+                </div>
+
+                <button type="submit" id="saveSettingsBtn" class="btn-pill btn-primary mt-12" style="width:100%;">Simpan Semua Pengaturan</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CARD DUKUNGAN SAWERIA -->
+      <section id="saweriaSupportSection" class="support-card scroll-reveal" style="display:none;">
+        <div class="support-card-left">
+          <div class="support-icon-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+          </div>
+          <div>
+            <h3 style="font-size:14.5px; font-weight:800; margin-bottom:2px;">Dukung Pengembangan SuruhAja</h3>
+            <p id="saweriaSupportDesc" class="text-muted">Suka layanan SuruhAja? Traktir kopi pengembang agar aplikasi tetap gratis!</p>
+          </div>
+        </div>
+        <a id="saweriaSupportBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-pill btn-saweria">
+          Dukung via Saweria
+        </a>
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="app-footer scroll-reveal">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <div class="brand" style="margin-bottom:8px;">
+              <div class="brand-logo" id="footerLogoBox" style="width:32px; height:32px; border-radius:10px;">
+                <svg width="20" height="20" viewBox="0 0 28 28" fill="none" aria-label="SuruhAja Logo">
+                  <circle cx="14" cy="14" r="10" fill="rgba(255,255,255,0.18)"/>
+                  <path d="M9 17.5C9 14.5 11.2 12.2 14 12.2C16.8 12.2 19 14.5 19 17.5" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/>
+                  <path d="M14 7.5V12.2M14 7.5L17.5 9.5" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="9.5" cy="19.2" r="2.2" fill="#FFFFFF"/>
+                  <circle cx="18.5" cy="19.2" r="2.2" fill="#FFFFFF"/>
+                </svg>
+              </div>
+              <strong id="footerBrandName" style="font-size:15.5px;">SuruhAja Cepu</strong>
+            </div>
+            <p id="footerDescription">Ojek, pesan makan &amp; kirim paket cepat khusus area Cepu.</p>
+          </div>
+
+          <div class="footer-col">
+            <h4>Kontak &amp; Area</h4>
+            <ul>
+              <li id="footerAddress">Khusus Area Cepu &amp; Sekitarnya</li>
+              <li id="footerWhatsapp">WA: 6281234567890</li>
+              <li id="footerEmail">halo@suruhaja.id</li>
+              <li id="footerInstagram">@suruhaja.cepu</li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h4>Akses Cepat</h4>
+            <ul>
+              <li><a href="javascript:void(0)" id="footerOrderLink">• Pesan Sekarang</a></li>
+              <li><a href="javascript:void(0)" id="footerOrdersLink">• Pesanan Kamu</a></li>
+              <li><a href="javascript:void(0)" id="footerRegDriverLink">• Daftar Jadi Driver</a></li>
+              <li><a href="javascript:void(0)" id="footerLoginLink">• Masuk Driver / Admin</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span id="footerCopyright">© 2026 SuruhAja Cepu. All rights reserved.</span>
+          <span>Area Cepu</span>
+        </div>
+      </footer>
+    </main>
+
+    <!-- TOMBOL MELAYANG CHAT WA LANGSUNG -->
+    <a id="floatingWaBtn" href="https://wa.me/6281234567890" target="_blank" rel="noopener" class="floating-wa-btn" title="Chat WhatsApp Langsung">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      <span>Chat WA</span>
+    </a>
+
+    <!-- ====================================================================
+         MINIMALIST BOTTOM NAVIGATION BAR (OUTLINE -> SOLID #00AA13)
+         ==================================================================== -->
+    <nav class="bottom-nav-wrap" aria-label="Navigasi Utama">
+      <div class="bottom-nav">
+        <button type="button" class="bnav-item active" data-view="home">
+          <svg class="bnav-svg-off" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1V9.5z"/></svg>
+          <svg class="bnav-svg-on" width="22" height="22" viewBox="0 0 24 24" fill="#00AA13"><path d="M12 2.2a1 1 0 0 1 .6.2l9 6.5a1 1 0 0 1 .4.8V20a2 2 0 0 1-2 2h-4.5a1 1 0 0 1-1-1v-5.5h-5V21a1 1 0 0 1-1 1H4a2 2 0 0 1-2-2V9.7a1 1 0 0 1 .4-.8l9-6.5a1 1 0 0 1 .6-.2z"/></svg>
+          <span>Beranda</span>
+        </button>
+
+        <button type="button" class="bnav-item" data-view="orders">
+          <svg class="bnav-svg-off" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 2.5 2 2.5-2 2.5 2 2.5-2 3 2V8l-6-6z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="13" y2="14"/></svg>
+          <svg class="bnav-svg-on" width="22" height="22" viewBox="0 0 24 24" fill="#00AA13"><path d="M6 2a2 2 0 0 0-2 2v16.2a1 1 0 0 0 1.55.83L8 19.4l2.45 1.63a1 1 0 0 0 1.1 0L14 19.4l2.45 1.63a1 1 0 0 0 1.1 0L20 19.4a1 1 0 0 0 .5-.86V8.5L14 2H6zm2 7h8a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2zm0 4h5a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2z"/></svg>
+          <span>Pesanan</span>
+        </button>
+
+        <button type="button" class="bnav-item" data-view="services">
+          <svg class="bnav-svg-off" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <svg class="bnav-svg-on" width="22" height="22" viewBox="0 0 24 24" fill="#00AA13"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+          <span>Layanan</span>
+        </button>
+
+        <button type="button" class="bnav-item" data-view="profile">
+          <svg class="bnav-svg-off" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg>
+          <svg class="bnav-svg-on" width="22" height="22" viewBox="0 0 24 24" fill="#00AA13"><circle cx="12" cy="8" r="4.5"/><path d="M4 20.5C4 16 7.6 13.5 12 13.5s8 2.5 8 7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>
+          <span>Akun</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ====================================================================
+       MODAL LOGIN & DAFTAR KHUSUS DRIVER / ADMIN
+       ==================================================================== -->
+  <div id="authModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="authModalTitle">Masuk Driver / Admin</h3>
+        <button type="button" id="closeAuthModalBtn" class="icon-btn" aria-label="Tutup">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="loginForm">
+        <div style="background:#ECFDF5; border:1px solid #A7F3D0; padding:12px; border-radius:14px; margin-bottom:14px; text-align:center;">
+          <div style="font-size:12.5px; font-weight:700; color:#064E3B; margin-bottom:8px;">Sudah daftar sebagai Mitra Driver?</div>
+          <button type="button" id="driverGoogleLoginBtn" class="btn-google-signin" style="width:100%;">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96z"/></svg>
+            <span>Masuk Mitra Driver (Google)</span>
+          </button>
+        </div>
+
+        <div style="background:var(--bg-input); padding:10px 12px; border-radius:12px; font-size:12px; color:var(--text-muted); margin-bottom:12px;">
+          Atau login menggunakan Username / Password (untuk Admin &amp; akun lama):
+        </div>
+        <div class="form-group">
+          <label for="loginIdentifier">Username atau Email</label>
+          <input type="text" id="loginIdentifier" class="form-control" placeholder="Masukkan username atau email" required />
+        </div>
+        <div class="form-group mt-12">
+          <label for="loginPassword">Password</label>
+          <div class="password-wrap">
+            <input type="password" id="loginPassword" class="form-control" placeholder="Masukkan password" required />
+            <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('loginPassword', this)" aria-label="Tampilkan Password">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button type="submit" id="loginSubmitBtn" class="btn-pill btn-primary mt-20" style="width:100%; padding:13px;">Masuk</button>
+        <p class="text-muted mt-12" style="text-align:center;">
+          Belum punya akun Driver? <a href="javascript:void(0)" id="gotoRegisterLink" style="color:var(--primary); font-weight:700;">Daftar Jadi Driver</a>
+        </p>
+      </form>
+
+      <form id="registerForm" style="display:none;">
+        <div id="regQuotaLoadingBox" style="padding:20px 12px; text-align:center; color:var(--text-muted); font-size:13px;">
+          Mengecek ketersediaan kuota mitra SuruhAja...
+        </div>
+
+        <div id="regQuotaFullBox" style="display:none; background:#FFF7ED; border:1px solid #FED7AA; color:#9A3412; padding:18px 14px; border-radius:16px; text-align:center;">
+          <div style="width:48px; height:48px; border-radius:14px; background:#FFEDD5; color:#C2410C; display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h4 style="font-size:15px; font-weight:800; margin-bottom:6px;">Kuota Mitra Driver Sedang Penuh</h4>
+          <p id="regQuotaFullText" style="font-size:12.5px; line-height:1.55; margin-bottom:14px;">
+            Mohon maaf, saat ini kuota mitra driver sudah penuh demi menjaga pemerataan pemasukan seluruh mitra aktif SuruhAja Cepu.
+          </p>
+          <a id="regWaitlistWaLink" href="javascript:void(0)" target="_blank" rel="noopener" class="btn-pill btn-primary" style="width:100%; padding:12px;">
+            Hubungi WhatsApp Admin (Daftar Tunggu)
+          </a>
+          <p class="text-muted mt-12" style="text-align:center;">
+            Sudah terdaftar sebelumnya? <a href="javascript:void(0)" id="regWaitlistLoginLink" style="color:var(--primary); font-weight:700;">Masuk</a>
+          </p>
+        </div>
+
+        <div id="regOpenWrap" style="display:none;">
+          <div id="regQuotaSlotInfo" style="background:#E8F8EE; color:#008A10; padding:9px 12px; border-radius:12px; font-size:12px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between;">
+            <span>Pendaftaran Mitra Dibuka</span>
+            <span id="regQuotaCountBadge">Tersedia</span>
+          </div>
+
+          <div id="regGoogleNotLoggedIn" style="background:var(--bg-input); padding:14px; border-radius:14px; text-align:center; margin-bottom:12px;">
+            <p style="font-size:12.5px; color:var(--text-main); font-weight:700; margin-bottom:6px;">Langkah 1: Login Akun Google (Wajib)</p>
+            <p class="text-muted" style="font-size:12px; margin-bottom:12px;">
+              Pendaftaran ringan tanpa KTP! Cukup masuk dengan Google agar identitas akun terverifikasi &amp; anti-duplikat.
+            </p>
+            <button type="button" id="regGoogleLoginBtn" class="btn-google-signin" style="width:100%;">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96z"/></svg>
+              <span>Masuk dengan Google</span>
+            </button>
+          </div>
+
+          <div id="regGoogleLoggedIn" style="display:none; background:#ECFDF5; border:1px solid #A7F3D0; padding:10px 12px; border-radius:12px; margin-bottom:12px;">
+            <div style="font-size:11px; font-weight:800; color:#065F46; text-transform:uppercase; letter-spacing:0.3px;">Akun Google Terverifikasi</div>
+            <div id="regGoogleDisplayName" style="font-size:13.5px; font-weight:800; color:#064E3B; margin-top:2px;">-</div>
+            <div id="regGoogleDisplayEmail" style="font-size:12px; color:#047857;">-</div>
+          </div>
+
+          <div id="regFormFieldsWrap" style="display:none;">
+            <div style="background:var(--bg-input); padding:9px 12px; border-radius:12px; font-size:11.5px; color:var(--text-muted); margin-bottom:12px;">
+              Tanpa KTP! Lengkapi data singkat berikut. Akun baru otomatis berstatus <strong>PENDING</strong> hingga disetujui Admin.
+            </div>
+            <div class="form-group">
+              <label for="regName">Nama Lengkap *</label>
+              <input type="text" id="regName" class="form-control" placeholder="Contoh: Andi Pratama" required />
+            </div>
+            <div class="form-group mt-12">
+              <label for="regPhone">Nomor WhatsApp Aktif *</label>
+              <input type="tel" id="regPhone" class="form-control" placeholder="08xxxxxxxxxx" required />
+            </div>
+            <div class="form-grid two-col mt-12">
+              <div class="form-group">
+                <label for="regVehicle">Jenis &amp; Warna Motor *</label>
+                <input type="text" id="regVehicle" class="form-control" placeholder="Contoh: Honda Beat Hitam" required />
+              </div>
+              <div class="form-group">
+                <label for="regPlate">Pelat Nomor *</label>
+                <input type="text" id="regPlate" class="form-control" placeholder="K 1234 XX" style="text-transform:uppercase;" required />
+              </div>
+            </div>
+            <div class="form-group mt-12">
+              <label for="regArea">Area Mangkal / Jangkauan</label>
+              <input type="text" id="regArea" class="form-control" value="Area Cepu" placeholder="Cepu Kota / Balun / Ngelo" />
+            </div>
+
+            <!-- Tata Tertib Mitra Driver -->
+            <div class="reg-rules-card mt-16">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                <span style="width:28px; height:28px; border-radius:9px; background:#ECFDF5; color:#00AA13; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                </span>
+                <div>
+                  <div class="reg-rules-card-title">Tata Tertib Mitra Driver SuruhAja</div>
+                  <div class="reg-rules-card-sub">Harap dibaca &amp; dipahami sebelum mengirim pendaftaran</div>
+                </div>
+              </div>
+              <ol class="reg-rules-list">
+                <li><strong>100% Penghasilan Milik Driver:</strong> Seluruh ongkos pelanggan adalah hak penuh driver tanpa potongan sepeser pun. Dukungan operasional aplikasi bersifat sukarela (seikhlasnya) melalui Saweria.</li>
+                <li><strong>Wajib Sesuai Tarif Aplikasi:</strong> Dilarang menaikkan tarif atau meminta biaya tambahan di luar aplikasi tanpa kesepakatan pelanggan (kecuali parkir resmi).</li>
+                <li><strong>Jujur &amp; Transparan (Titip Beli/Makanan):</strong> Wajib konfirmasi total belanjaan ke pelanggan terlebih dahulu dan menyertakan nota/struk asli saat pengantaran.</li>
+                <li><strong>Satu Orang Satu Akun &amp; Kendaraan Sesuai Data:</strong> Dilarang meminjamkan akun atau memakai kendaraan/pelat nomor yang berbeda dari data terdaftar.</li>
+                <li><strong>Aturan Keaktifan Kuota Terbatas:</strong> Akun yang tidak pernah mengambil order sama sekali selama 14 hari berturut-turut tanpa keterangan dapat dinonaktifkan agar slot kuota bisa diberikan kepada antrean mitra berikutnya.</li>
+                <li><strong>Sanksi Tegas:</strong> Penipuan, order fiktif, atau perilaku tidak sopan akan berakibat pemblokiran permanen (blacklist).</li>
+              </ol>
+
+              <label for="regRulesAgreeCheckbox" class="reg-rules-agree">
+                <input type="checkbox" id="regRulesAgreeCheckbox" required style="width:18px; height:18px; margin-top:1px; accent-color:#00AA13; flex-shrink:0; cursor:pointer;" />
+                <span>Saya sudah membaca, memahami, dan setuju mematuhi seluruh Tata Tertib Mitra SuruhAja Cepu.</span>
+              </label>
+            </div>
+
+            <button type="submit" id="regSubmitBtn" class="btn-pill btn-primary mt-16" style="width:100%; padding:13px; opacity:0.55; cursor:not-allowed;" disabled>Kirim Pendaftaran Driver</button>
+          </div>
+
+          <p class="text-muted mt-12" style="text-align:center;">
+            Sudah punya akun Driver / Admin? <a href="javascript:void(0)" id="gotoLoginLink" style="color:var(--primary); font-weight:700;">Masuk</a>
+          </p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL ORDER BERHASIL -->
+  <div id="orderSuccessModal" class="modal-backdrop">
+    <div class="modal-card success-modal-card">
+      <div class="success-check-circle">✓</div>
+      <h3 style="font-size:21px; margin-bottom:6px;">Pesanan Tercatat!</h3>
+      <p style="font-size:13.5px; opacity:0.94; margin-bottom:16px;">
+        Kode Order: <strong id="succOrderCode">SRH-0000</strong><br/>
+        Driver: <strong id="succDriverName">Driver Tersedia</strong><br/>
+        Estimasi Ongkos: <strong id="succOrderTotal">Rp 0</strong>
+      </p>
+      <div id="succDriverCardBox" style="background:rgba(255,255,255,0.14); border:1px solid rgba(255,255,255,0.28); border-radius:14px; padding:12px; margin-bottom:14px; text-align:left;">
+        <div style="font-size:11px; font-weight:700; opacity:0.88; text-transform:uppercase; letter-spacing:0.3px;">Info Driver</div>
+        <div id="succDriverCardName" style="font-size:14px; font-weight:800; margin-top:2px;">Driver Tersedia</div>
+        <div id="succDriverCardMeta" style="font-size:12px; opacity:0.9; margin-bottom:10px;">Siap menuju lokasi jemput</div>
+        <a id="succChatDriverLink" href="#" target="_blank" rel="noopener" class="btn-wa-chat" style="width:100%;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.766.469 3.484 1.344 5l-1.406 5.156 5.281-1.375c1.469.797 3.109 1.219 4.75 1.219 5.516 0 9.969-4.453 9.969-9.969s-4.453-10-9.969-10zm5.813 14.125c-.25.703-1.453 1.344-2 1.422-.516.078-1.172.109-1.891-.125-.438-.141-1-.328-1.719-.641-3.016-1.312-4.984-4.359-5.141-4.562-.156-.203-1.234-1.641-1.234-3.125 0-1.484.781-2.219 1.063-2.516.281-.297.609-.375.813-.375.203 0 .406 0 .578.016.188.016.438-.078.688.516.25.609.859 2.094.938 2.25.078.156.125.344.016.547-.094.203-.156.328-.313.5-.156.172-.328.391-.469.531-.156.156-.313.328-.141.641.172.313.766 1.266 1.641 2.047 1.125 1 2.078 1.313 2.391 1.469.313.156.5.125.688-.078.188-.203.797-.922 1.016-1.234.219-.313.422-.266.719-.156.297.109 1.875.891 2.203 1.047.328.156.547.234.625.359.078.125.078.734-.172 1.438z"/></svg>
+          <span>Chat Driver via WhatsApp</span>
+        </a>
+      </div>
+
+      <a id="succWaLink" href="#" target="_blank" rel="noopener" class="btn-hero-white" style="width:100%; justify-content:center; margin-bottom:10px;">
+        Lanjut Kirim ke WhatsApp
+      </a>
+      <button type="button" id="copyLastOrderBtn" class="btn-hero-ghost" style="width:100%; margin-bottom:10px;">
+        Salin Teks Pesanan
+      </button>
+      <a id="succSaweriaLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-hero-ghost" style="display:none; width:100%; justify-content:center; margin-bottom:10px;">
+        Dukung via Saweria
+      </a>
+      <button type="button" id="closeSuccessModalBtn" class="btn-hero-ghost" style="width:100%;">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL ADMIN EDITOR -->
+  <div id="adminEditorModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="adminEditorTitle">Edit Data</h3>
+        <button type="button" id="closeAdminEditorModalBtn" class="icon-btn" aria-label="Tutup">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div id="adminEditorBody"></div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
+
+
+  <script src="supabase-api.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
